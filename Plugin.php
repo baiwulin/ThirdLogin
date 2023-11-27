@@ -5,14 +5,14 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
 /**
  * Typecho互联，支持15种第三方登录：QQ/腾讯微博/新浪微博/网易微博/人人网/360/豆瓣/Github/Google/Msn/点点/淘宝网/百度/开心网/搜狐
  *
- * @package TeConnect
+ * @package ThirdLogin
  * @author 大卫科技Blog
  * @version 2.0
  * @link https://www.iyuu.cn
  *
  * 使用了麦当苗儿SDK http://topthink.com，适配修改为typecho
  */
-class TeConnect_Plugin implements Typecho_Plugin_Interface
+class ThirdLogin_Plugin implements Typecho_Plugin_Interface
 {
     /**
      * 激活插件方法,如果激活失败,直接抛出异常
@@ -26,8 +26,8 @@ class TeConnect_Plugin implements Typecho_Plugin_Interface
         $info = self::installDb();
 
         //SNS帐号登录
-        Helper::addRoute('oauth', '/oauth', 'TeConnect_Widget', 'oauth');
-        Helper::addRoute('oauth_callback', '/oauth_callback', 'TeConnect_Widget', 'callback');
+        Helper::addRoute('oauth', '/oauth', 'ThirdLogin_Widget', 'oauth');
+        Helper::addRoute('oauth_callback', '/oauth_callback', 'ThirdLogin_Widget', 'callback');
 
         return _t($info);
     }
@@ -157,7 +157,7 @@ class TeConnect_Plugin implements Typecho_Plugin_Interface
             $format= '<a href="{url}" title="{title}">{title}</a>';
         } else {
             //登录按钮样式
-            $format= '<a href="{url}"><img src="/usr/plugins/TeConnect/login_ico/{type}.png" alt="{type}-{title}" style="margin-top: 0.8em;"></a>';
+            $format= '<a href="{url}"><img src="/usr/plugins/ThirdLogin/login_ico/{type}.png" alt="{type}-{title}" style="margin-top: 0.8em;"></a>';
         }
 
         $list = self::options();
@@ -180,7 +180,7 @@ class TeConnect_Plugin implements Typecho_Plugin_Interface
     {
         static $options = array();
         if (empty($options)) {
-            $connect = Typecho_Widget::Widget('Widget_Options')->plugin('TeConnect')->connect;
+            $connect = Typecho_Widget::Widget('Widget_Options')->plugin('ThirdLogin')->connect;
             $connect = preg_split('/[;\r\n]+/', trim($connect, ",;\r\n"));
             foreach ($connect as $v) {
                 $v = explode(':', $v);

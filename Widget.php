@@ -1,5 +1,5 @@
 <?php
-class TeConnect_Widget extends Widget_Abstract_Users
+class ThirdLogin_Widget extends Widget_Abstract_Users
 {
     private $auth;
     private $oauth_user;
@@ -39,7 +39,7 @@ class TeConnect_Widget extends Widget_Abstract_Users
             throw new Typecho_Widget_Exception("请选择登录方式!");
         } else {
             $type = strtolower($type);
-            $options = TeConnect_Plugin::options();
+            $options = ThirdLogin_Plugin::options();
 
             //判断登录方式是否支持
             if (!isset($options[$type])) {
@@ -61,11 +61,11 @@ class TeConnect_Widget extends Widget_Abstract_Users
                 session_start();
             }
             // 登录前页面
-            $this->referer = isset($_COOKIE['TeConnect_Referer']) ? urldecode($_COOKIE['TeConnect_Referer']) : $this->request->getReferer();
-            setcookie("TeConnect_Referer", "", time() - 3600);
+            $this->referer = isset($_COOKIE['ThirdLogin_Referer']) ? urldecode($_COOKIE['ThirdLogin_Referer']) : $this->request->getReferer();
+            setcookie("ThirdLogin_Referer", "", time() - 3600);
             if (strpos($this->referer, $this->options->index) === 0) {
                 // 站内来源页放入session
-                $_SESSION['TeConnect_Referer'] = $this->referer;
+                $_SESSION['ThirdLogin_Referer'] = $this->referer;
             }
             //302重定向
             $this->response->redirect($sdk->getRequestCodeURL());
@@ -91,8 +91,8 @@ class TeConnect_Widget extends Widget_Abstract_Users
         $this->auth = isset($_SESSION['__typecho_auth']) ? $_SESSION['__typecho_auth']  : array();
         $this->oauth_user = isset($_SESSION['__typecho_oauth_user']) ? $_SESSION['__typecho_oauth_user']  : array();
         // session内取出来源页
-        $this->referer = isset($_SESSION['TeConnect_Referer']) ? $_SESSION['TeConnect_Referer'] : '';
-        unset($_SESSION['TeConnect_Referer']);
+        $this->referer = isset($_SESSION['ThirdLogin_Referer']) ? $_SESSION['ThirdLogin_Referer'] : '';
+        unset($_SESSION['ThirdLogin_Referer']);
 
         //仅处理来自绑定界面POST提交的数据，第三方回调会跳过
         if ($this->request->isPost()) {
@@ -112,7 +112,7 @@ class TeConnect_Widget extends Widget_Abstract_Users
         }
 
         //第三方登录回调处理
-        $options = TeConnect_Plugin::options();
+        $options = ThirdLogin_Plugin::options();
         $oauth_user = array();
         if (empty($this->auth)) {
             $code = $this->request->get('code', '');
@@ -172,7 +172,7 @@ class TeConnect_Widget extends Widget_Abstract_Users
             }
 
             //未登录状态且未绑定，控制显示绑定界面
-            $custom = $this->options->plugin('TeConnect')->custom;
+            $custom = $this->options->plugin('ThirdLogin')->custom;
             if (!$custom && !empty($this->auth['nickname'])) {
                 $dataStruct = array(
                     'screenName'=>  $this->auth['nickname'],

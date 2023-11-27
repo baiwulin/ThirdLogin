@@ -84,7 +84,7 @@ abstract class ThinkOauth
         $this->Type = strtoupper(substr($class, 0, strlen($class)-3));
 
         //获取应用配置
-        $config = TeConnect_Plugin::options(strtolower($this->Type));
+        $config = ThirdLogin_Plugin::options(strtolower($this->Type));
         if (empty($config['id']) || empty($config['key'])) {
             throw new Exception('请配置您申请的APP_KEY和APP_SECRET');
         } else {
