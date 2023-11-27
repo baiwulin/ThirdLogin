@@ -100,7 +100,7 @@ class ThirdLogin_Plugin implements Typecho_Plugin_Interface
             return self::addTable();
         } catch (Typecho_Db_Exception $e) {
             if ('42S01' == $e->getCode()) {
-                $msg = '数据表oauth_user已存在!';
+                $msg = '数据表third_login已存在!';
                 return $msg;
             }
         }
@@ -111,7 +111,7 @@ class ThirdLogin_Plugin implements Typecho_Plugin_Interface
         $db = Typecho_Db::get();
         $prefix = $db->getPrefix();
         if ("Pdo_Mysql" === $db->getAdapterName() || "Mysql" === $db->getAdapterName()) {
-            $sql = "CREATE TABLE IF NOT EXISTS `{$prefix}oauth_user` (
+            $sql = "CREATE TABLE IF NOT EXISTS `{$prefix}third_login` (
                   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
                   `uid` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '用户ID',
                   `uuid` int(10) unsigned NOT NULL DEFAULT '0',
@@ -135,7 +135,7 @@ class ThirdLogin_Plugin implements Typecho_Plugin_Interface
         } else {
             throw new Typecho_Plugin_Exception(_t('对不起, 本插件仅支持MySQL数据库。'));
         }
-        return "数据表oauth_user安装成功！";
+        return "数据表third_login安装成功！";
     }
     //删除数据表
     public static function removeTable()
@@ -143,11 +143,11 @@ class ThirdLogin_Plugin implements Typecho_Plugin_Interface
         $db = Typecho_Db::get();
         $prefix = $db->getPrefix();
         try {
-            $db->query("DROP TABLE `" . $prefix . "oauth_user`", Typecho_Db::WRITE);
+            $db->query("DROP TABLE `" . $prefix . "third_login`", Typecho_Db::WRITE);
         } catch (Typecho_Exception $e) {
-            return "删除oauth_user表失败！";
+            return "删除third_login表失败！";
         }
-        return "删除oauth_user表成功！";
+        return "删除third_login表成功！";
     }
     //在前端调用显示登录按钮
     public static function show($text = false)

@@ -2,7 +2,7 @@
 class ThirdLogin_Widget extends Widget_Abstract_Users
 {
     private $auth;
-    private $oauth_user;
+    private $third_login;
     private $referer = ''; // 来源页面
     /**
      * 风格目录
@@ -89,7 +89,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             session_start();
         }
         $this->auth = isset($_SESSION['__typecho_auth']) ? $_SESSION['__typecho_auth']  : array();
-        $this->oauth_user = isset($_SESSION['__typecho_oauth_user']) ? $_SESSION['__typecho_oauth_user']  : array();
+        $this->third_login = isset($_SESSION['__typecho_third_login']) ? $_SESSION['__typecho_third_login']  : array();
         // session内取出来源页
         $this->referer = isset($_SESSION['ThirdLogin_Referer']) ? $_SESSION['ThirdLogin_Referer'] : '';
         unset($_SESSION['ThirdLogin_Referer']);
@@ -107,13 +107,13 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             $func = 'doCallback'.ucfirst($do);
             $this->$func();
             unset($_SESSION['__typecho_auth']);
-            unset($_SESSION['__typecho_oauth_user']);
+            unset($_SESSION['__typecho_third_login']);
             $this->response->redirect(empty($this->referer) ? $this->options->index : $this->referer);
         }
 
         //第三方登录回调处理
         $options = ThirdLogin_Plugin::options();
-        $oauth_user = array();
+        $third_login = array();
         if (empty($this->auth)) {
             $code = $this->request->get('code', '');
             $this->auth['type'] = $this->request->get('type', '');
@@ -132,7 +132,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             if (is_array($token)) {
                 //获取第三方账号数据
                 $user_info = $this->$type($token);
-                $oauth_user = array(
+                $third_login = array(
                     'uid'           =>  0,
                     'openid'        =>  $token['openid'],
                     'access_token'  =>  $token['access_token'],
@@ -156,13 +156,13 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             $this->auth['uuid'] = $this->user->uid;
 
             //直接绑定第三方账号
-            $this->bindUser($this->user->uid, $oauth_user, $this->auth['type']);
+            $this->bindUser($this->user->uid, $third_login, $this->auth['type']);
             //提示，并跳转
             $this->widget('Widget_Notice')->set(array('成功绑定账号!'));
             $this->response->redirect(empty($this->referer) ? $this->options->index : $this->referer);
         } else {
             //未登录状态，查询第三方账号的绑定关系
-            $isConnect = $this->findConnectUser($oauth_user, $this->auth['type']);
+            $isConnect = $this->findConnectUser($third_login, $this->auth['type']);
             if ($isConnect) {
                 //已经绑定，直接登录
                 $this->useUidLogin($isConnect['uid']);
@@ -180,7 +180,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
                     'group'     =>  'subscriber'
                 );
                 //新注册账号
-                $uid = $this->regConnectUser($dataStruct, $oauth_user);
+                $uid = $this->regConnectUser($dataStruct, $third_login);
                 if ($uid) {
                     $this->widget('Widget_Notice')->set(array('已成功注册并登陆!'));
                 } else {
@@ -191,7 +191,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
                 //用户绑定界面
                 if (!isset($_SESSION['__typecho_auth'])) {
                     $_SESSION['__typecho_auth'] = $this->auth;
-                    $_SESSION['__typecho_oauth_user'] = $oauth_user;
+                    $_SESSION['__typecho_third_login'] = $third_login;
                 }
                 //未绑定，引导用户到绑定界面
                 $this->render('callback.php');
@@ -214,7 +214,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             $this->auth['uuid'] = $this->user->uid;
 
             $this->widget('Widget_Notice')->set(array('已成功绑定并登陆!'));
-            $this->bindUser($this->user->uid, $this->oauth_user, $this->auth['type']);
+            $this->bindUser($this->user->uid, $this->third_login, $this->auth['type']);
         } else {
             $this->widget('Widget_Notice')->set(array('帐号或密码错误!'), 'error');
             $this->response->goBack();
@@ -252,20 +252,20 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             'created'   =>  $this->options->gmtTime,
             'group'     =>  'subscriber'
         );
-        $uid = $this->regConnectUser($dataStruct, $this->oauth_user);
+        $uid = $this->regConnectUser($dataStruct, $this->third_login);
         if ($uid) {
             $this->widget('Widget_Notice')->set(array('已成功注册并登陆!'));
         }
     }
 
-    protected function regConnectUser($data, $oauth_user)
+    protected function regConnectUser($data, $third_login)
     {
         $insertId = $this->insert($data);
         if ($insertId) {
             //UUID会员的原始ID
             $this->auth['uuid'] = $insertId;
 
-            $this->bindUser($insertId, $oauth_user, $this->auth['type']);
+            $this->bindUser($insertId, $third_login, $this->auth['type']);
             $this->useUidLogin($insertId);
             return $insertId;
         } else {
@@ -275,35 +275,35 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
 
     //处理用户与第三方账号的绑定关系（逻辑复杂）
     // 同一用户，可以绑定15种不同的登录方式！但是，同类型的第三方账号仅可绑定一个！
-    protected function bindUser($uid, $oauth_user, $type)
+    protected function bindUser($uid, $third_login, $type)
     {
-        $oauth_user['uid'] = $uid;
+        $third_login['uid'] = $uid;
         if (isset($this->auth['uuid'])) {
-            $oauth_user['uuid'] = $this->auth['uuid'];
+            $third_login['uuid'] = $this->auth['uuid'];
         }
         //查询当前登录的账号是否绑定？
         $connect = $this->db->fetchRow($this->db->select()
-            ->from('table.oauth_user')
+            ->from('table.third_login')
             ->where('uid = ?', $uid)
             ->where('type = ?', $type)
             ->limit(1));
         if (empty($connect)) {
             //未绑定
-            $oauthRow = $this->findConnectUser($oauth_user, $type);
+            $oauthRow = $this->findConnectUser($third_login, $type);
             if ($oauthRow) {
                 //已存在第三方账号，更新绑定关系
                 $this->db->query($this->db
-                ->update('table.oauth_user')
+                ->update('table.third_login')
                 ->rows(array('uid' => $uid))
-                ->where('openid = ?', $oauth_user['openid'])
+                ->where('openid = ?', $third_login['openid'])
                 ->where('type = ?', $type));
             } else {
                 //未绑定，插入数据并绑定
-                $this->db->query($this->db->insert('table.oauth_user')->rows($oauth_user));
+                $this->db->query($this->db->insert('table.third_login')->rows($third_login));
             }
         } else {
             //已绑定，判断更新条件，避免绑定错乱（同类型的第三方账号，用户只能绑定一个）
-            if ($connect['openid'] == $oauth_user['openid']) {
+            if ($connect['openid'] == $third_login['openid']) {
                 ###更新资料tudo
             } else {
                 ###换绑tudo
@@ -311,11 +311,11 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
         }
     }
     //查找第三方账号
-    protected function findConnectUser($oauth_user, $type)
+    protected function findConnectUser($third_login, $type)
     {
         $user = $this->db->fetchRow($this->db->select()
-            ->from('table.oauth_user')
-            ->where('openid = ?', $oauth_user['openid'])
+            ->from('table.third_login')
+            ->where('openid = ?', $third_login['openid'])
             ->where('type = ?', $type)
             ->limit(1));
         return empty($user)? 0 : $user;
@@ -337,7 +337,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             ->rows(array('authCode' => $authCode))
             ->where('uid = ?', $uid));
         $this->db->query($this->db
-            ->update('table.oauth_user')
+            ->update('table.third_login')
             ->rows(array('datetime' => date("Y-m-d H:i:s", time())))
             ->where('uid = ?', $uid));
     }
