@@ -129,15 +129,23 @@ abstract class ThinkOauth
     /**
      * 请求code
      */
-    public function getRequestCodeURL()
+    public function getRequestCodeURL($type)
     {
         $this->config();
         //Oauth 标准参数
-        $params = array(
-            'client_id'     => $this->AppKey,
-            'redirect_uri'  => $this->Callback,
-            'response_type' => $this->ResponseType,
-        );
+        if ($type = 'wx'){
+            $params = array(
+                'appid'         => $this->AppKey,
+                'redirect_uri'  => $this->Callback,
+                'response_type' => $this->ResponseType,
+            );
+        }else{
+            $params = array(
+                'client_id'     => $this->AppKey,
+                'redirect_uri'  => $this->Callback,
+                'response_type' => $this->ResponseType,
+            );
+        }
 
         //获取额外参数
         if ($this->Authorize) {

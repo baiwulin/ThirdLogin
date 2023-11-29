@@ -68,7 +68,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
                 $_SESSION['ThirdLogin_Referer'] = $this->referer;
             }
             //302重定向
-            $this->response->redirect($sdk->getRequestCodeURL());
+            $this->response->redirect($sdk->getRequestCodeURL($type));
         }
     }
     /**
