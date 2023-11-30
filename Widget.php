@@ -363,6 +363,29 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
         require $this->_themeDir . $fileName;
     }
 
+    //登录成功，获取微信用户信息
+    public function wx($token)
+    {
+        $qq = ThinkOauth::getInstance('wx', $token);
+        $data = $qq->call('sns/userinfo');
+        if (empty($data['errcode'])) {
+            $userInfo['name'] = $data['nickname'];
+            $userInfo['nickname'] = $data['nickname'];
+            $userInfo['head_img'] = $data['headimgurl'];
+
+            if ($data['sex'] == 1) {
+                $userInfo['gender'] = 1;
+            } elseif ($data['sex'] == 2) {
+                $userInfo['gender'] = 2;
+            } else {
+                $userInfo['gender'] = 0;
+            }
+            return $userInfo;
+        } else {
+            $this->widget('Widget_Notice')->set(array("获取用户信息失败：{$data['msg']}"), 'error');
+        }
+    }
+
     //登录成功，获取QQ用户信息
     public function qq($token)
     {
