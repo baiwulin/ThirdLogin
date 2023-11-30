@@ -163,16 +163,25 @@ abstract class ThinkOauth
      * 获取access_token
      * @param string $code 上一步请求到的code
      */
-    public function getAccessToken($code, $extend = null)
+    public function getAccessToken($type, $code, $extend = null)
     {
         $this->config();
-        $params = array(
+        if ($type = 'wx') {
+            $params = array(
+                'appid'         => $this->AppKey,
+                'secret'        => $this->AppSecret,
+                'grant_type'    => $this->GrantType,
+                'code'          => $code
+            );
+        } else {
+            $params = array(
                 'client_id'     => $this->AppKey,
                 'client_secret' => $this->AppSecret,
                 'grant_type'    => $this->GrantType,
                 'code'          => $code,
                 'redirect_uri'  => $this->Callback,
-        );
+            );
+        }
 
         $data = $this->http($this->GetAccessTokenURL, $params, 'POST');
         $this->Token = $this->parseToken($data, $extend);

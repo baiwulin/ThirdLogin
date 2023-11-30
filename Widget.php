@@ -128,7 +128,7 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
             require_once 'ThinkOauth.php';
             $sdk = ThinkOauth::getInstance($type);
             //请求接口(返回值包含openid)
-            $token = $sdk->getAccessToken($code);
+            $token = $sdk->getAccessToken($type, $code);
             if (is_array($token)) {
                 //获取第三方账号数据
                 $user_info = $this->$type($token);
