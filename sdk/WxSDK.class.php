@@ -59,7 +59,7 @@ class WxSDK extends ThinkOauth
      */
     protected function parseToken($result, $extend)
     {
-        parse_str($result, $data);
+        $data = json_decode($result, true);
         if ($data['access_token'] && $data['expires_in']) {
             $this->Token = $data;
             return $data;
