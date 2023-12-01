@@ -23,7 +23,7 @@ class ThirdLogin_Plugin implements Typecho_Plugin_Interface
     {
         $info = self::installDb();
 
-        //SNS帐号登录
+        //建立oauth路由
         Helper::addRoute('oauth', '/oauth', 'ThirdLogin_Widget', 'oauth');
         Helper::addRoute('oauth_callback', '/oauth_callback', 'ThirdLogin_Widget', 'callback');
 
