@@ -46,7 +46,7 @@ class WxSDK extends ThinkOauth
         /* 微信调用公共参数 */
         $params = array(
             'access_token' => $this->Token['access_token'],
-            'openid' => $this->Token['openid']
+            'openid'       => $this->openid()
         );
 
         $data = $this->http($this->url($api), $this->param($params, $param), $method);
@@ -65,6 +65,20 @@ class WxSDK extends ThinkOauth
             return $data;
         } else {
             throw new Exception("获取微信 ACCESS_TOKEN 出错：{$result}");
+        }
+    }
+
+    /**
+     * 获取当前授权应用的openid
+     * @return string
+     */
+    public function openid()
+    {
+        $data = $this->Token;
+        if (isset($data['openid'])) {
+            return $data['openid'];
+        } else {
+            throw new Exception('没有获取到openid！');
         }
     }
 }
