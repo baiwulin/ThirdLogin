@@ -366,8 +366,8 @@ class ThirdLogin_Widget extends Widget_Abstract_Users
     //登录成功，获取微信用户信息
     public function wx($token)
     {
-        $qq = ThinkOauth::getInstance('wx', $token);
-        $data = $qq->call('sns/userinfo');
+        $wx = ThinkOauth::getInstance('wx', $token);
+        $data = $wx->call('sns/userinfo');
         if (empty($data['errcode'])) {
             $userInfo['name'] = $data['nickname'];
             $userInfo['nickname'] = $data['nickname'];
